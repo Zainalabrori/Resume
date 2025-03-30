@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Bootstrap 5 CSS CDN -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     /* BACKGROUND GRADIENT DENGAN DOMINAN #38424c */
     body {
@@ -147,12 +149,16 @@
         <!-- Filename di tengah -->
         <h6 class="m-0">resume.json</h6>
         <!-- Tombol Toggle di kanan -->
-        <button id="toggleBtn" class="action-btn" title="Expand/Collapse">
+        <!-- <button id="toggleBtn" class="action-btn" title="Expand/Collapse">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
                stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
             <path d="M5 15l7-7 7 7"></path>
           </svg>
-        </button>
+        </button> -->
+        <button id="toggleBtn" class="action-btn" title="Expand/Collapse">
+          <i class="fa-solid fa-down-left-and-up-right-to-center"></i>
+          <i class="fa-solid fa-up-right-and-down-left-from-center" style="display: none;"></i>
+        </button>        
       </div>
       <!-- CARD BODY -->
       <div class="card-body text-light" id="codeBody">
@@ -253,16 +259,23 @@
     }
     
     // Toggle Expand/Collapse
-    let isExpanded = false;
-    toggleBtn.addEventListener('click', () => {
-      isExpanded = !isExpanded;
-      const cardCont = document.getElementById('cardContainer');
-      if (isExpanded) {
-        cardCont.classList.add('expanded');
-      } else {
-        cardCont.classList.remove('expanded');
-      }
-    });
+    // let isExpanded = false;
+    // toggleBtn.addEventListener('click', () => {
+    //   isExpanded = !isExpanded;
+    //   const cardCont = document.getElementById('cardContainer');
+    //   if (isExpanded) {
+    //     cardCont.classList.add('expanded');
+    //   } else {
+    //     cardCont.classList.remove('expanded');
+    //   }
+    // });
+    document.getElementById('toggleBtn').addEventListener('click', () => {
+  const card = document.getElementById('cardContainer');
+  card.classList.toggle('expanded');
+  const icons = document.getElementById('toggleBtn').querySelectorAll('i');
+  icons.forEach(icon => icon.style.display = icon.style.display === 'none' ? 'inline' : 'none');
+});
+
   </script>
 </body>
 </html>
