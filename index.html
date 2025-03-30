@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Resizable JSON Code Card</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap 5 CSS CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    /* BACKGROUND GRADIENT DENGAN DOMINAN #38424c */
+    body {
+      background: linear-gradient(135deg, #2b4f72, #453152);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      font-family: "Fira Code", Consolas, monospace;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* KONTAINER CARD RESIZABLE */
+    .resizable-card {
+      transition: all 0.3s ease;
+      /* Ukuran default collapsed: 80vw x 60vh (rasio 3:4) */
+      width: 90vw;
+      height: 45vh;
+    }
+    .resizable-card.expanded {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* CARD STYLE */
+    .card {
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-header {
+      background: transparent;
+      border-bottom: 1px solid rgba(255,255,255,0.3) !important;
+    }
+    .card-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* Custom vertical scrollbar (minimalis) */
+    .card-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    .card-body::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+    }
+    .card-body::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.4);
+      border-radius: 3px;
+    }
+    /* Untuk Firefox */
+    .card-body {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.4) rgba(255,255,255,0.1);
+    }
+
+    /* Syntax Highlighting JSON */
+    .brace { color: #e06c75; }
+    .key   { color: #79b8ff; }
+    .str   { color: #ce9178; }
+    .num   { color: #b5cea8; }
+    .bool  { color: #d19a66; }
+    .null  { color: #d19a66; }
+
+    pre {
+      margin: 0;
+      padding: 12px;
+      font-size: 0.9rem;
+      line-height: 1.2;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #eaeaea;
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast-custom {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #333;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-10px);
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 9999;
+      font-size: 0.85rem;
+    }
+    .toast-custom.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    /* Tombol (icon) */
+    .action-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+      color: #fff;
+    }
+    .action-btn:hover {
+      opacity: 1;
+    }
+    .rotate {
+      transform: rotate(180deg);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast-custom">Copied to clipboard!</div>
+
+  <!-- RESIZABLE CARD CONTAINER -->
+  <div class="resizable-card" id="cardContainer">
+    <div class="card text-white">
+      <!-- CARD HEADER -->
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <!-- Tombol Copy di kiri -->
+        <button id="copyBtn" class="action-btn" title="Copy">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+               stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+        <!-- Filename di tengah -->
+        <h6 class="m-0">resume.json</h6>
+        <!-- Tombol Toggle di kanan -->
+        <button id="toggleBtn" class="action-btn" title="Expand/Collapse">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+               stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+            <path d="M5 15l7-7 7 7"></path>
+          </svg>
+        </button>
+      </div>
+      <!-- CARD BODY -->
+      <div class="card-body text-light" id="codeBody">
+        <pre>
+<span class="brace">{</span>
+  <span class="key">"name"</span>: <span class="str">"Zainal Abrori"</span>,
+  <span class="key">"profession"</span>: <span class="str">"Fullstack Web Developer"</span>,
+  <span class="key">"email"</span>: <span class="str">"abrorizainal263@gmail.com"</span>,
+  <span class="key">"telephone"</span>: <span class="str">"+62 85745750951"</span>,
+  <span class="key">"location"</span>: <span class="str">"Pamekasan, Jawa Timur, Indonesia"</span>,
+  <span class="key">"professional_summary"</span>: <span class="str">"Highly skilled and results-driven Fullstack Web Developer with 2 years of experience designing, developing, and deploying dynamic web applications. Proficient in crafting scalable, secure, and userfriendly solutions across diverse industries. Expertise spans both frontend and backend development, ensuring seamless integration and performance optimization."</span>,
+  <span class="key">"experience"</span>: [
+    {
+      <span class="key">"company"</span>: <span class="str">"PT Surya Sejahtera Sentosa"</span>,
+      <span class="key">"description"</span>: <span class="str">"Create an applications to manage goods in factories and warehouses"</span>,
+      <span class="key">"duration"</span>: <span class="str">"Februari 2024 - Juni 2024"</span>
+    },
+    {
+      <span class="key">"company"</span>: <span class="str">"PT Multidaya Dinamika"</span>,
+      <span class="key">"description"</span>: <span class="str">"Take part in building an applications to manage a tourist attraction"</span>,
+      <span class="key">"duration"</span>: <span class="str">"Agustus 2024 - November 2024"</span>
+    }
+  ],
+  <span class="key">"education"</span>: [
+    {
+      <span class="key">"type"</span>: <span class="str">"Vocational High School"</span>,
+      <span class="key">"institution"</span>: <span class="str">"SMK Nahdliyatul Islamiyah"</span>,
+      <span class="key">"duration"</span>: <span class="str">"Juni 2020 - Juni 2023"</span>
+    },
+    {
+      <span class="key">"type"</span>: <span class="str">"Course"</span>,
+      <span class="key">"institution"</span>: <span class="str">"Lab Akselerasi"</span>,
+      <span class="key">"duration"</span>: <span class="str">"Juli 2023 - Juli 2024"</span>
+    }
+  ],
+  <span class="key">"skills"</span>: {
+    <span class="key">"Front-End"</span>: [
+      <span class="str">"Html5"</span>,
+      <span class="str">"Css3"</span>,
+      <span class="str">"Javascript"</span>,
+      <span class="str">"Bootstrap"</span>,
+      <span class="str">"Flutter"</span>
+    ],
+    <span class="key">"Back-End"</span>: [
+      <span class="str">"Python"</span>,
+      <span class="str">"Php"</span>,
+      <span class="str">"Golang"</span>,
+      <span class="str">"Mysql"</span>,
+      <span class="str">"Laravel"</span>,
+      <span class="str">"Phalcon"</span>
+    ],
+    <span class="key">"Tools"</span>: [
+      <span class="str">"Visual Studio Code"</span>,
+      <span class="str">"Gitbash"</span>,
+      <span class="str">"Gitlab"</span>,
+      <span class="str">"Postman"</span>,
+      <span class="str">"Idx"</span>,
+      <span class="str">"Zerotier"</span>,
+      <span class="str">"Anydesk"</span>
+    ],
+    <span class="key">"Soft Skills"</span>: [
+      <span class="str">"Problem Solving"</span>,
+      <span class="str">"Self Management"</span>,
+      <span class="str">"Working With People"</span>,
+      <span class="str">"Technology Adaptation"</span>
+    ]
+  }
+<span class="brace">}</span>
+        </pre>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bootstrap 5 JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Selektor elemen
+    const copyBtn   = document.getElementById('copyBtn');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const codeBody  = document.getElementById('codeBody');
+    const toast     = document.getElementById('toast');
+    const cardContainer = document.getElementById('cardContainer');
+    
+    // Fitur Copy ke Clipboard
+    copyBtn.addEventListener('click', () => {
+      const codeText = codeBody.innerText.trim();
+      navigator.clipboard.writeText(codeText)
+        .then(() => showToast("Copied to clipboard!"))
+        .catch(err => console.error("Gagal menyalin teks:", err));
+    });
+    
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+    
+    // Toggle Expand/Collapse
+    let isExpanded = false;
+    toggleBtn.addEventListener('click', () => {
+      isExpanded = !isExpanded;
+      const cardCont = document.getElementById('cardContainer');
+      if (isExpanded) {
+        cardCont.classList.add('expanded');
+      } else {
+        cardCont.classList.remove('expanded');
+      }
+    });
+  </script>
+</body>
+</html>
